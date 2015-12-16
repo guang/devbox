@@ -18,6 +18,8 @@ RUN apt-get update \
 
 RUN apt-get update -y \
     && apt-get install -y python-pip
+# pip install python-dateutil first to get most up to date version
+RUN pip install python-dateutil
 RUN apt-get install -y python-psycopg2
 RUN apt-get install -y python-matplotlib
 RUN apt-get install -y python-lxml
@@ -69,3 +71,4 @@ RUN curl -sL --retry 3 "http://central.maven.org/maven2/org/apache/hadoop/hadoop
 
 # Plushy Specific
 RUN pip install -r /home/dev/plushy_requirements.txt
+ENV PYTHONPATH /home/dev/plushy
