@@ -1,29 +1,27 @@
 FROM debian:jessie
 
-RUN apt-get update -y
-RUN apt-get install -y git
-RUN apt-get install -y ruby
-RUN apt-get install -y vim-nox
-RUN apt-get install -y tcpdump
-RUN apt-get install -y screen
-RUN apt-get install -y ruby-dev
-RUN apt-get install -y cmake
-RUN apt-get install -y pkg-config
-RUN apt-get install -y python-dev
+RUN apt-get update -y \
+    && apt-get install -y curl net-tools unzip python ruby\
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update \
-  && apt-get install -y curl net-tools unzip python \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+# Get most updated pip
+RUN curl -s https://bootstrap.pypa.io/get-pip.py > get-pip.py \
+    && python get-pip.py
 
 RUN apt-get update -y \
-    && apt-get install -y python-pip
-# pip install python-dateutil first to get most up to date version
-RUN pip install python-dateutil
-RUN apt-get install -y python-psycopg2
-RUN apt-get install -y python-matplotlib
-RUN apt-get install -y python-lxml
-RUN apt-get install -y python-scipy
+    && apt-get install -y git \
+    && apt-get install -y vim-nox \
+    && apt-get install -y tcpdump \
+    && apt-get install -y screen \
+    && apt-get install -y ruby-dev \
+    && apt-get install -y cmake \
+    && apt-get install -y pkg-config \
+    && apt-get install -y python-dev \
+    && apt-get install -y python-psycopg2 \
+    && apt-get install -y python-matplotlib \
+    && apt-get install -y python-lxml \
+    && apt-get install -y python-scipy
 
 WORKDIR /home/dev
 ENV HOME /home/dev
@@ -71,4 +69,16 @@ RUN curl -sL --retry 3 "http://central.maven.org/maven2/org/apache/hadoop/hadoop
 
 # Plushy Specific
 RUN pip install -r /home/dev/plushy_requirements.txt
-ENV PYTHONPATH /home/dev/plushy
+ENV PYTHONPATH /home/dev/plushy:$SPARK_HOME/python/:$SPARK_HOME/python/lib/py4j-0.8.2.1-src.zip
+ENV SPARK_MASTER_DNS guang.spark
+
+# Airflow Specific
+RUN git clone https://github.com/gy8/airflow.git $HOME/airflow_dev
+RUN apt-get install -y libmysqlclient-dev
+RUN cd $HOME/airflow_dev \
+    && git checkout feat_postgres_check \
+    && pip install -r requirements.txt \
+    && python setup.py develop
+ENV AIRFLOW_HOME /home/dev/airflow_config
+
+CMD ["tail", "-F", "/etc/hosts"]
