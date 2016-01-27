@@ -36,4 +36,6 @@ filechunkio
 simplejson
 pytest
 mock
-freezegun
+pytest-pep8
+pytest-cov
+-e git+https://github.com/spulec/freezegun.git#egg=freezegun
